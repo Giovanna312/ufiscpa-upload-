@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, 
+ UploadedFile, 
+  BadRequestException 
+} from '@nestjs/common';
 import { ArquivoService } from './arquivo.service';
 import { CreateArquivoDto } from './dto/create-arquivo.dto';
 import { UpdateArquivoDto } from './dto/update-arquivo.dto';
@@ -8,7 +11,7 @@ import { diskStorage } from 'multer';
 
 @Controller('arquivo')
 export class ArquivoController {
-  constructor(private readonly arquivoService: ArquivoService) { }
+  constructor(private readonly arquivoService: ArquivoService) {}
 
   @Post('upload')
   @UseInterceptors(
@@ -22,13 +25,14 @@ export class ArquivoController {
         },
       }),
     }),
-  )
+  )  
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('Nenhum arquivo enviado.');
+      throw new BadRequestException("Nenhum arquivo enviado.");
     }
     return this.arquivoService.create(file);
   }
+
   @Get()
   findAll() {
     return this.arquivoService.findAll();
