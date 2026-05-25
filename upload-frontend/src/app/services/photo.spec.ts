@@ -1,16 +1,21 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { ArquivoComponent } from '../arquivo/arquivo';
 
-import { Photo } from './photo';
+describe('ArquivoComponent', () => {
+  let component: ArquivoComponent;
 
-describe('Photo', () => {
-  let service: Photo;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ArquivoComponent],
+      providers: [provideHttpClient()]
+    }).compileComponents();
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Photo);
+    const fixture = TestBed.createComponent(ArquivoComponent);
+    component = fixture.componentInstance;
   });
 
   it('should be created', () => {
-    expect(service).toBeTruthy();
+    expect(component).toBeTruthy();
   });
 });

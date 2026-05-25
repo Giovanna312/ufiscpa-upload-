@@ -1,45 +1,67 @@
-import { Component, OnInit } from '@angular/core';
-import { PhotoService } from '../services/photo.service';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
+export interface Foto {
+  id?: number;
+  url: string;      
+  titulo?: string;  
+}
 
 @Component({
-  selector: 'app-arquivo',
-  templateUrl: './arquivo.html'
+  selector: 'app-arquivo', // Ajustado para bater com a tag que você vai usar no HTML
+  standalone: true,
+  imports: [CommonModule], 
+  templateUrl: './arquivo.html' // Ajustado para apontar para o seu arquivo HTML dessa pasta
 })
-export class ArquivoComponent implements OnInit {
+export class ArquivoComponent implements OnInit { // Nome alterado para ArquivoComponent para o app.component achar!
+  private http = inject(HttpClient);
 
-  photos: any[] = [];
-  loading = false;
+  private readonly API_URL = 'http://localhost:3000/api/arquivo'; 
 
-  constructor(private photoService: PhotoService) {}
+  fotos = signal<Foto[]>([]);
+  loading = signal<boolean>(false);
 
   ngOnInit() {
-    this.loadPhotos();
+    this.carregarFotos();
   }
 
-  loadPhotos() {
-    this.loading = true;
-
-    this.photoService.getPhotos().subscribe({
-      next: (data) => {
-        this.photos = data;
-        this.loading = false;
+  carregarFotos() {
+    this.loading.set(true);
+    this.http.get<Foto[]>(this.API_URL).subscribe({
+      next: (dados) => {
+        this.fotos.set(dados);
+        this.loading.set(false);
       },
-      error: () => {
-        this.loading = false;
+      error: (err) => {
+        console.error('Erro ao buscar fotos:', err);
+        this.loading.set(false);
       }
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files.length > 0) {
+      const arquivo = input.files[0];
+      const formData = new FormData();
+      
+      formData.append('file', arquivo); 
 
-    this.photoService.uploadPhoto(file).subscribe({
-      next: (newPhoto) => {
-        // ⭐ diferencial (sem F5)
-        this.photos = [newPhoto, ...this.photos];
-      }
-    });
+      this.loading.set(true);
+
+      this.http.post<Foto>(this.API_URL, formData).subscribe({
+        next: (novaFoto) => {
+          this.fotos.update((listaAtual) => [novaFoto, ...listaAtual]);
+          this.loading.set(false);
+          input.value = ''; 
+        },
+        error: (err) => {
+          console.error('Erro no upload:', err);
+          this.loading.set(false);
+        }
+      });
+    }
   }
 }

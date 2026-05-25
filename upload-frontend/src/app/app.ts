@@ -4,7 +4,7 @@ import { ArquivoComponent } from './arquivo/arquivo';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ArquivoComponent],
+  imports: [RouterOutlet, ArquivoComponent  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
