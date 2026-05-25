@@ -1,0 +1,16 @@
+<div class="p-4">
+
+  <!-- Upload -->
+  <input type="file" (change)="onFileSelected($event)" class="mb-4"/>
+
+  <!-- Loading -->
+  <div *ngIf="loading">Carregando...</div>
+
+  <!-- Grid -->
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <img *ngFor="let photo of photos"
+         [src]="photo.url"
+         class="w-full h-40 object-cover rounded shadow"/>
+  </div>
+
+</div>
