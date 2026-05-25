@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException,Injectable,NotFoundException,
+} from '@nestjs/common';
 import { CreateArquivoDto } from './dto/create-arquivo.dto';
 import { UpdateArquivoDto } from './dto/update-arquivo.dto';
 import * as fs from 'fs';
@@ -12,11 +13,12 @@ export class ArquivoService {
       fs.mkdirSync(this.pastaUpload, { recursive: true });
     }
   }
-  //Retorna os dados do arquivo após o upload
+
   create(arquivo: Express.Multer.File) {
     return {
       message: 'Arquivo enviado com sucesso!',
       filename: arquivo.filename,
+      url: `http://localhost:3000/${arquivo.filename}`,
       originalname: arquivo.originalname,
       size: arquivo.size,
     };
@@ -25,22 +27,26 @@ export class ArquivoService {
   findAll() {
     try {
       const files = fs.readdirSync(this.pastaUpload);
-      const fileList = files.map(
-        (filename) => {
-          const stats = fs.statSync(`${this.pastaUpload}/${filename}`);
-          return {
-            filename,
-            size: stats.size,
-            criado: stats.birthtime,
-          };
-        }
-      );
+
+      const fileList = files.map((filename) => {
+        const stats = fs.statSync(`${this.pastaUpload}/${filename}`);
+
+        return {
+          filename,
+          url: `http://localhost:3000/${filename}`, 
+          size: stats.size,
+          criado: stats.birthtime,
+        };
+      });
+
       return {
         total: fileList.length,
         files: fileList,
       };
     } catch (error) {
-      throw new BadRequestException('Não foi possivel listar os arquivos.')
+      throw new BadRequestException(
+        'Não foi possivel listar os arquivos.',
+      );
     }
   }
 
@@ -53,18 +59,19 @@ export class ArquivoService {
   }
 
   remove(filename: string) {
-  const caminhoArquivo = `${this.pastaUpload}/${filename}`;
+    const caminhoArquivo = `${this.pastaUpload}/${filename}`;
 
-  if (!fs.existsSync(caminhoArquivo)) {
-    throw new NotFoundException(
-      `Arquivo ${filename} não encontrado`,
-    );
+    if (!fs.existsSync(caminhoArquivo)) {
+      throw new NotFoundException(
+        `Arquivo ${filename} não encontrado`,
+      );
+    }
+
+    fs.unlinkSync(caminhoArquivo);
+
+    return {
+      mensagem: 'Arquivo removido com sucesso!',
+      filename,
+    };
   }
-
-  fs.unlinkSync(caminhoArquivo);
-
-  return {
-    mensagem: 'Arquivo removido com sucesso!',
-  };
-}
 }
